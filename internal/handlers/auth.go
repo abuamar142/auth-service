@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/abuamar142/auth-service/internal/middleware"
+	_ "github.com/abuamar142/auth-service/internal/models"
 	"github.com/abuamar142/auth-service/internal/services"
 )
 
@@ -25,7 +26,7 @@ func NewAuthHandler(svc *services.AuthService) *AuthHandler {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body object true "Registration payload" Example({"email":"test@example.com","username":"johndoe","password":"secretpass123","display_name":"John Doe"})
+// @Param        body body models.RegisterRequest true "Registration payload"
 // @Success      201 {object} Response
 // @Failure      400 {object} Response
 // @Failure      409 {object} Response
@@ -74,7 +75,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body object true "Login payload" Example({"identifier":"test@example.com","password":"secretpass123"})
+// @Param        body body models.LoginRequest true "Login payload"
 // @Success      200 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response
@@ -116,7 +117,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body object true "Refresh payload" Example({"refresh_token":"a1b2c3d4e5f6..."})
+// @Param        body body models.RefreshRequest true "Refresh payload"
 // @Success      200 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response
@@ -158,7 +159,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        body body object true "Logout payload" Example({"refresh_token":"a1b2c3d4e5f6..."})
+// @Param        body body models.LogoutRequest true "Logout payload"
 // @Success      200 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response

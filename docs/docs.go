@@ -103,7 +103,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.CreateAPIKeyRequest"
                         }
                     }
                 ],
@@ -201,7 +201,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.LoginRequest"
                         }
                     }
                 ],
@@ -252,7 +252,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.LogoutRequest"
                         }
                     }
                 ],
@@ -329,7 +329,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.RefreshRequest"
                         }
                     }
                 ],
@@ -375,7 +375,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.RegisterRequest"
                         }
                     }
                 ],
@@ -403,6 +403,71 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_abuamar142_auth-service_internal_models.CreateAPIKeyRequest": {
+            "type": "object",
+            "properties": {
+                "expires_in": {
+                    "type": "string",
+                    "example": "90d"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "portfolio-backend"
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "identifier": {
+                    "type": "string",
+                    "example": "test@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secretpass123"
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.LogoutRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "e1d2a3b4c5f6a7b8c9d0e1f2a3b4c5d6a7b8c9d0e1f2a3b4c5d6a7b8c9d0e1f2"
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.RefreshRequest": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string",
+                    "example": "e1d2a3b4c5f6a7b8c9d0e1f2a3b4c5d6a7b8c9d0e1f2a3b4c5d6a7b8c9d0e1f2"
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "test@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "secretpass123"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "johndoe"
+                }
+            }
+        },
         "internal_handlers.ErrorBody": {
             "type": "object",
             "properties": {

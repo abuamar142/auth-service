@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	_ "github.com/abuamar142/auth-service/internal/models"
 	"github.com/abuamar142/auth-service/internal/services"
 )
 
@@ -43,7 +44,7 @@ func (h *APIKeyHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        body body object true "API key payload" Example({"name":"portfolio-backend","expires_in":"90d"})
+// @Param        body body models.CreateAPIKeyRequest true "API key payload"
 // @Success      201 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response
