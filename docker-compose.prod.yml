@@ -1,0 +1,7 @@
+services:
+  db:
+    container_name: auth-service-db
+  app:
+    container_name: auth-service-app
+    ports:
+      - "127.0.0.1:8080:8080"

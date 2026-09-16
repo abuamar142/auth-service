@@ -1,0 +1,21 @@
+name: Deploy Auth Service
+
+on:
+  push:
+    branches: [main, development]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd /opt/auth-service
+            DEPLOY_BRANCH="${{ github.ref_name }}"
+            bash /opt/ops/bin/deploy-auth-service.sh "$DEPLOY_BRANCH"

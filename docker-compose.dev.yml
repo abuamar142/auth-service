@@ -1,0 +1,37 @@
+services:
+  db-dev:
+    image: postgres:17-alpine
+    container_name: auth-service-db-dev
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-auth-db}_dev
+    ports:
+      - "5434:5432"
+    volumes:
+      - auth-service-pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-auth} -d ${POSTGRES_DB:-auth-db}_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app-dev:
+    container_name: auth-service-app-dev
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-auth}:${POSTGRES_PASSWORD}@db-dev:5432/${POSTGRES_DB:-auth-db}_dev?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: "8080"
+    depends_on: !reset
+      db-dev:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    build:
+      context: .
+    command: ["/auth"]
+
+volumes:
+  auth-service-pgdata-dev:
+    name: auth-service-pgdata-dev
