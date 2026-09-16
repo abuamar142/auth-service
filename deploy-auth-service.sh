@@ -56,12 +56,12 @@ for i in {1..30}; do
     HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$HEALTH_PORT/api/health" 2>/dev/null || echo "000")
     if [ "$HTTP_CODE" = "200" ]; then
         echo "✅ auth-service ($ENV) is healthy"
-        notify_success "auth-service" "auth-service $ENV deployed successfully on $BRANCH"
+        notify_deploy_success "auth-service" "$BRANCH"
         exit 0
     fi
     sleep 1
 done
 
 echo "❌ Health check failed (last HTTP: $HTTP_CODE)"
-notify_fail "auth-service" "auth-service $ENV health check failed after deploy (HTTP $HTTP_CODE)"
+notify_deploy_fail "auth-service" "$BRANCH"
 exit 1
