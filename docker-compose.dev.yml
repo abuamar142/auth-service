@@ -3,8 +3,9 @@ services:
     image: postgres:17-alpine
     container_name: auth-service-db-dev
     restart: unless-stopped
-    env_file: .env
     environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-auth-db}_dev
     ports:
       - "5434:5432"
@@ -18,7 +19,7 @@ services:
 
   app-dev:
     container_name: auth-service-app-dev
-    env_file: .env
+    restart: unless-stopped
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-auth}:${POSTGRES_PASSWORD}@db-dev:5432/${POSTGRES_DB:-auth-db}_dev?sslmode=disable
       JWT_SECRET: ${JWT_SECRET}

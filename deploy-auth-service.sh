@@ -44,7 +44,11 @@ echo "Building ($ENV)..."
 docker compose --env-file "$ENV_FILE" $COMPOSE_FILES build
 
 echo "Starting services ($ENV)..."
-docker compose --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans
+if [ "$ENV" = "dev" ]; then
+    docker compose --env-file "$ENV_FILE" $COMPOSE_FILES up -d --build --remove-orphans app-dev db-dev
+else
+    docker compose --env-file "$ENV_FILE" $COMPOSE_FILES up -d --build --remove-orphans app db
+fi
 
 # Health check
 echo "Waiting for health check on port $HEALTH_PORT..."
