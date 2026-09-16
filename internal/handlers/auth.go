@@ -19,6 +19,17 @@ func NewAuthHandler(svc *services.AuthService) *AuthHandler {
 	return &AuthHandler{AuthService: svc}
 }
 
+// Register godoc
+// @Summary      Register a new user
+// @Description  Create a new user account. At least one of email or username is required.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body object true "Registration payload"
+// @Success      201 {object} Response
+// @Failure      400 {object} Response
+// @Failure      409 {object} Response
+// @Router       /api/v1/auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email       string `json:"email"`
@@ -57,6 +68,17 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, "user registered", user)
 }
 
+// Login godoc
+// @Summary      Login
+// @Description  Authenticate with email/username + password. Returns JWT access + refresh tokens.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body object true "Login payload"
+// @Success      200 {object} Response
+// @Failure      400 {object} Response
+// @Failure      401 {object} Response
+// @Router       /api/v1/auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Identifier string `json:"identifier"`
@@ -88,6 +110,17 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Refresh godoc
+// @Summary      Refresh tokens
+// @Description  Exchange a refresh token for a new access + refresh token pair (rotation).
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body body object true "Refresh payload"
+// @Success      200 {object} Response
+// @Failure      400 {object} Response
+// @Failure      401 {object} Response
+// @Router       /api/v1/auth/refresh [post]
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
@@ -118,6 +151,18 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Logout godoc
+// @Summary      Logout
+// @Description  Revoke a refresh token (invalidates the session).
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        body body object true "Logout payload"
+// @Success      200 {object} Response
+// @Failure      400 {object} Response
+// @Failure      401 {object} Response
+// @Router       /api/v1/auth/logout [post]
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUser(r.Context())
 	if user == nil {
@@ -146,6 +191,15 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, "logged out", nil)
 }
 
+// Me godoc
+// @Summary      Get current user
+// @Description  Returns the authenticated user's profile.
+// @Tags         auth
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} Response
+// @Failure      401 {object} Response
+// @Router       /api/v1/auth/me [get]
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUser(r.Context())
 	if user == nil {

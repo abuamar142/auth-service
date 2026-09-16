@@ -22,10 +22,35 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
+
+// @title           Auth Service API
+// @version         1.0
+// @description     Central authentication microservice — SSO for all abuamar.online projects.
+// @termsOfService  https://abuamar.online/terms
+
+// @contact.name   Abu Amar
+// @contact.email  abuamar.albadawi@gmail.com
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      auth.abuamar.online
+// @BasePath  /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter "Bearer {token}"
+
+// @securityDefinitions.apikey APIKeyAuth
+// @in header
+// @name X-API-Key
+// @description Enter your API key
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -71,6 +96,11 @@ func main() {
 
 	// Health (unversioned, load balancers need it)
 	r.Get("/api/health", healthH.ServeHTTP)
+
+	// Swagger UI
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+	))
 
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {

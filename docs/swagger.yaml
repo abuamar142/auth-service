@@ -1,0 +1,288 @@
+basePath: /
+definitions:
+  internal_handlers.ErrorBody:
+    properties:
+      code:
+        type: string
+      details:
+        type: string
+    type: object
+  internal_handlers.Response:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/internal_handlers.ErrorBody'
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: auth.abuamar.online
+info:
+  contact:
+    email: abuamar.albadawi@gmail.com
+    name: Abu Amar
+  description: Central authentication microservice — SSO for all abuamar.online projects.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://abuamar.online/terms
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /api/health:
+    get:
+      description: Returns service health status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      summary: Health check
+      tags:
+      - health
+  /api/v1/api-keys:
+    get:
+      description: Returns all API keys for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      security:
+      - BearerAuth: []
+      summary: List API keys
+      tags:
+      - api-keys
+    post:
+      consumes:
+      - application/json
+      description: Generate a new API key. The raw key is shown once — store it securely.
+      parameters:
+      - description: API key payload
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      security:
+      - BearerAuth: []
+      summary: Create API key
+      tags:
+      - api-keys
+  /api/v1/api-keys/{id}:
+    delete:
+      description: Permanently delete an API key by ID.
+      parameters:
+      - description: API key ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete API key
+      tags:
+      - api-keys
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate with email/username + password. Returns JWT access
+        + refresh tokens.
+      parameters:
+      - description: Login payload
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      summary: Login
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revoke a refresh token (invalidates the session).
+      parameters:
+      - description: Logout payload
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      security:
+      - BearerAuth: []
+      summary: Logout
+      tags:
+      - auth
+  /api/v1/auth/me:
+    get:
+      description: Returns the authenticated user's profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Exchange a refresh token for a new access + refresh token pair
+        (rotation).
+      parameters:
+      - description: Refresh payload
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      summary: Refresh tokens
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account. At least one of email or username is
+        required.
+      parameters:
+      - description: Registration payload
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/internal_handlers.Response'
+      summary: Register a new user
+      tags:
+      - auth
+securityDefinitions:
+  APIKeyAuth:
+    description: Enter your API key
+    in: header
+    name: X-API-Key
+    type: apiKey
+  BearerAuth:
+    description: Enter "Bearer {token}"
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
