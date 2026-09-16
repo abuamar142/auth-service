@@ -43,7 +43,7 @@ func (h *APIKeyHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        body body object true "API key payload"
+// @Param        body body object true "API key payload" Example({"name":"portfolio-backend","expires_in":"90d"})
 // @Success      201 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response

@@ -25,7 +25,7 @@ func NewAuthHandler(svc *services.AuthService) *AuthHandler {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body object true "Registration payload"
+// @Param        body body object true "Registration payload" Example({"email":"test@example.com","username":"johndoe","password":"secretpass123","display_name":"John Doe"})
 // @Success      201 {object} Response
 // @Failure      400 {object} Response
 // @Failure      409 {object} Response
@@ -74,7 +74,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body object true "Login payload"
+// @Param        body body object true "Login payload" Example({"identifier":"test@example.com","password":"secretpass123"})
 // @Success      200 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response
@@ -116,7 +116,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        body body object true "Refresh payload"
+// @Param        body body object true "Refresh payload" Example({"refresh_token":"a1b2c3d4e5f6..."})
 // @Success      200 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response
@@ -158,7 +158,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 // @Accept       json
 // @Produce      json
 // @Security     BearerAuth
-// @Param        body body object true "Logout payload"
+// @Param        body body object true "Logout payload" Example({"refresh_token":"a1b2c3d4e5f6..."})
 // @Success      200 {object} Response
 // @Failure      400 {object} Response
 // @Failure      401 {object} Response
