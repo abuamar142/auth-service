@@ -41,13 +41,13 @@ fi
 
 # Build and deploy
 echo "Building ($ENV)..."
-docker compose --env-file "$ENV_FILE" $COMPOSE_FILES build
+docker compose --project-name "auth-service-$ENV" --env-file "$ENV_FILE" $COMPOSE_FILES build
 
 echo "Starting services ($ENV)..."
 if [ "$ENV" = "dev" ]; then
-    docker compose --env-file "$ENV_FILE" $COMPOSE_FILES up -d --build --remove-orphans app-dev db-dev
+    docker compose --project-name "auth-service-dev" --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans app-dev db-dev
 else
-    docker compose --env-file "$ENV_FILE" $COMPOSE_FILES up -d --build --remove-orphans app db
+    docker compose --project-name "auth-service" --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans app db
 fi
 
 # Health check
