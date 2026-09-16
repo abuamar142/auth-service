@@ -1,4 +1,4 @@
-package handlers
+package response
 
 import (
 	"encoding/json"
@@ -19,7 +19,8 @@ type ErrorBody struct {
 	Details string `json:"details,omitempty"`
 }
 
-func writeJSON(w http.ResponseWriter, status int, message string, data interface{}) {
+// JSON writes a success JSON response.
+func JSON(w http.ResponseWriter, status int, message string, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(Response{
@@ -29,7 +30,8 @@ func writeJSON(w http.ResponseWriter, status int, message string, data interface
 	})
 }
 
-func writeError(w http.ResponseWriter, status int, code, message, details string) {
+// Error writes a standard JSON error response. Usable from middleware and handlers.
+func Error(w http.ResponseWriter, status int, code, message, details string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	errBody := &ErrorBody{Code: code}

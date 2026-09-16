@@ -194,6 +194,12 @@ func (s *AuthService) ValidateAccessToken(ctx context.Context, tokenStr string) 
 		return nil, errors.New("invalid token claims")
 	}
 
+	// Validate issuer
+	iss, _ := claims["iss"].(string)
+	if iss != "auth.abuamar.online" {
+		return nil, errors.New("invalid token issuer")
+	}
+
 	userID, _ := claims["sub"].(string)
 	if userID == "" {
 		return nil, errors.New("missing subject in token")
@@ -287,6 +293,7 @@ func (s *AuthService) signAccessToken(user *models.User) (string, error) {
 	now := time.Now()
 	claims := jwt.MapClaims{
 		"sub": user.ID,
+		"iss": "auth.abuamar.online",
 		"iat": now.Unix(),
 		"exp": now.Add(s.AccessTokenTTL).Unix(),
 	}

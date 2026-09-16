@@ -37,7 +37,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -62,19 +62,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -111,19 +111,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerAPIKeyResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -157,25 +157,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -209,19 +209,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerTokenResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -260,19 +260,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -297,13 +297,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerUserResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -337,19 +337,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerTokenResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -383,19 +383,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerUserResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/internal_handlers.Response"
+                            "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerResponse"
                         }
                     }
                 }
@@ -468,29 +468,151 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_handlers.ErrorBody": {
+        "github_com_abuamar142_auth-service_internal_models.SwaggerAPIKeyResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "string"
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "api_key": {
+                            "type": "object",
+                            "properties": {
+                                "created_at": {
+                                    "type": "string",
+                                    "example": "2026-09-16T08:30:00Z"
+                                },
+                                "expires_at": {
+                                    "type": "string",
+                                    "example": "2026-12-15T00:00:00Z"
+                                },
+                                "id": {
+                                    "type": "string",
+                                    "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "portfolio-backend"
+                                },
+                                "prefix": {
+                                    "type": "string",
+                                    "example": "ak_a1b2c3d4"
+                                }
+                            }
+                        },
+                        "key": {
+                            "type": "string",
+                            "example": "ak_a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+                        }
+                    }
                 },
-                "details": {
-                    "type": "string"
+                "message": {
+                    "type": "string",
+                    "example": "api key created"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
-        "internal_handlers.Response": {
+        "github_com_abuamar142_auth-service_internal_models.SwaggerError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "VALIDATION_ERROR"
+                },
+                "details": {
+                    "type": "string",
+                    "example": "field is required"
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.SwaggerResponse": {
             "type": "object",
             "properties": {
                 "data": {},
                 "error": {
-                    "$ref": "#/definitions/internal_handlers.ErrorBody"
+                    "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerError"
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "operation successful"
                 },
                 "success": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.SwaggerTokenResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "access_token": {
+                            "type": "string",
+                            "example": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyZDk0NGVkNi0yODVlLTRjMTMtODkxMS04OTUyMGMzNGU0M2QiLCJlbWFpbCI6InRlc3RAZXhhbXBsZS5jb20iLCJ1c2VybmFtZSI6ImpvaG5kb2UiLCJpYXQiOjE3ODk1NDcwNTksImV4cCI6MTc4OTU0Nzk1OX0.RWWXCR49EGPyZvVeqDTmKAdn3pnpXXWK1yx9Jk5-BRY"
+                        },
+                        "refresh_token": {
+                            "type": "string",
+                            "example": "54204a5db8e34b88874032e4b63add0e538747c0e498f4db7217b706dda18c24"
+                        }
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "login successful"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.SwaggerUser": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-09-16T08:23:55.441437Z"
+                },
+                "display_name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "test@example.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "2d944ed6-285e-4c13-8911-89520c34e43d"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-09-16T08:23:55.441437Z"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "johndoe"
+                }
+            }
+        },
+        "github_com_abuamar142_auth-service_internal_models.SwaggerUserResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/github_com_abuamar142_auth-service_internal_models.SwaggerUser"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "user registered"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         }

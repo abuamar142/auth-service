@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	_ "github.com/abuamar142/auth-service/internal/models"
+	"github.com/abuamar142/auth-service/internal/response"
 	"github.com/abuamar142/auth-service/internal/services"
 )
 
@@ -24,17 +25,17 @@ func NewAPIKeyHandler(svc *services.AuthService) *APIKeyHandler {
 // @Tags         api-keys
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200 {object} Response
-// @Failure      401 {object} Response
-// @Failure      500 {object} Response
+// @Success      200 {object} models.SwaggerResponse
+// @Failure      401 {object} models.SwaggerResponse
+// @Failure      500 {object} models.SwaggerResponse
 // @Router       /api/v1/api-keys [get]
 func (h *APIKeyHandler) List(w http.ResponseWriter, r *http.Request) {
 	keys, err := h.AuthService.ListAPIKeys(r.Context())
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list API keys", "")
+		response.Error(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list API keys", "")
 		return
 	}
-	writeJSON(w, http.StatusOK, "api keys retrieved", keys)
+	response.JSON(w, http.StatusOK, "api keys retrieved", keys)
 }
 
 // Create godoc
@@ -45,9 +46,9 @@ func (h *APIKeyHandler) List(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        body body models.CreateAPIKeyRequest true "API key payload"
-// @Success      201 {object} Response
-// @Failure      400 {object} Response
-// @Failure      401 {object} Response
+// @Success      201 {object} models.SwaggerAPIKeyResponse
+// @Failure      400 {object} models.SwaggerResponse
+// @Failure      401 {object} models.SwaggerResponse
 // @Router       /api/v1/api-keys [post]
 func (h *APIKeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req struct {
@@ -55,11 +56,11 @@ func (h *APIKeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 		ExpiresIn string `json:"expires_in,omitempty"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
+		response.Error(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
 		return
 	}
 	if req.Name == "" {
-		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "name is required", "")
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "name is required", "")
 		return
 	}
 
@@ -67,7 +68,7 @@ func (h *APIKeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if req.ExpiresIn != "" {
 		d, err := parseDuration(req.ExpiresIn)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "invalid expires_in format", "use e.g. '30d', '24h'")
+			response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "invalid expires_in format", "use e.g. '30d', '24h'")
 			return
 		}
 		t := time.Now().Add(d)
@@ -76,11 +77,11 @@ func (h *APIKeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	rawKey, apiKey, err := h.AuthService.CreateAPIKey(r.Context(), req.Name, expiresAt)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to create API key", "")
+		response.Error(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to create API key", "")
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, "api key created", map[string]interface{}{
+	response.JSON(w, http.StatusCreated, "api key created", map[string]interface{}{
 		"api_key": apiKey,
 		"key":     rawKey,
 	})
@@ -93,23 +94,23 @@ func (h *APIKeyHandler) Create(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        id path string true "API key ID"
-// @Success      200 {object} Response
-// @Failure      400 {object} Response
-// @Failure      401 {object} Response
-// @Failure      404 {object} Response
+// @Success      200 {object} models.SwaggerResponse
+// @Failure      400 {object} models.SwaggerResponse
+// @Failure      401 {object} models.SwaggerResponse
+// @Failure      404 {object} models.SwaggerResponse
 // @Router       /api/v1/api-keys/{id} [delete]
 func (h *APIKeyHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "API key ID is required", "")
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "API key ID is required", "")
 		return
 	}
 
 	err := h.AuthService.DeleteAPIKey(r.Context(), id)
 	if err != nil {
-		writeError(w, http.StatusNotFound, "NOT_FOUND", "API key not found", "")
+		response.Error(w, http.StatusNotFound, "NOT_FOUND", "API key not found", "")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, "api key deleted", nil)
+	response.JSON(w, http.StatusOK, "api key deleted", nil)
 }

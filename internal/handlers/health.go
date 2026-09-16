@@ -1,6 +1,11 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+
+	_ "github.com/abuamar142/auth-service/internal/models"
+	"github.com/abuamar142/auth-service/internal/response"
+)
 
 type HealthHandler struct{}
 
@@ -13,8 +18,8 @@ func NewHealthHandler() *HealthHandler {
 // @Description  Returns service health status
 // @Tags         health
 // @Produce      json
-// @Success      200 {object} Response
+// @Success      200 {object} models.SwaggerResponse
 // @Router       /api/health [get]
 func (h *HealthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, "service healthy", map[string]string{"status": "ok"})
+	response.JSON(w, http.StatusOK, "service healthy", map[string]string{"status": "ok"})
 }

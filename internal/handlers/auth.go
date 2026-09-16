@@ -9,6 +9,7 @@ import (
 
 	"github.com/abuamar142/auth-service/internal/middleware"
 	_ "github.com/abuamar142/auth-service/internal/models"
+	"github.com/abuamar142/auth-service/internal/response"
 	"github.com/abuamar142/auth-service/internal/services"
 )
 
@@ -27,9 +28,9 @@ func NewAuthHandler(svc *services.AuthService) *AuthHandler {
 // @Accept       json
 // @Produce      json
 // @Param        body body models.RegisterRequest true "Registration payload"
-// @Success      201 {object} Response
-// @Failure      400 {object} Response
-// @Failure      409 {object} Response
+// @Success      201 {object} models.SwaggerUserResponse
+// @Failure      400 {object} models.SwaggerResponse
+// @Failure      409 {object} models.SwaggerResponse
 // @Router       /api/v1/auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req struct {
@@ -39,15 +40,15 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		DisplayName string `json:"display_name"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
+		response.Error(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
 		return
 	}
 	if req.Password == "" {
-		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "password is required", "")
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "password is required", "")
 		return
 	}
 	if len(req.Password) < 8 {
-		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "password too short", "must be at least 8 characters")
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "password too short", "must be at least 8 characters")
 		return
 	}
 
@@ -55,18 +56,16 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrIdentifierRequired):
-			writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", err.Error(), "")
-		case errors.Is(err, services.ErrEmailExists):
-			writeError(w, http.StatusConflict, "CONFLICT", "email already exists", "")
-		case errors.Is(err, services.ErrUsernameExists):
-			writeError(w, http.StatusConflict, "CONFLICT", "username already exists", "")
+			response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", err.Error(), "")
+		case errors.Is(err, services.ErrEmailExists), errors.Is(err, services.ErrUsernameExists):
+			response.Error(w, http.StatusConflict, "IDENTIFIER_TAKEN", "email or username already taken", "")
 		default:
-			writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to register user", "")
+			response.Error(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to register user", "")
 		}
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, "user registered", user)
+	response.JSON(w, http.StatusCreated, "user registered", user)
 }
 
 // Login godoc
@@ -76,9 +75,9 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 // @Accept       json
 // @Produce      json
 // @Param        body body models.LoginRequest true "Login payload"
-// @Success      200 {object} Response
-// @Failure      400 {object} Response
-// @Failure      401 {object} Response
+// @Success      200 {object} models.SwaggerTokenResponse
+// @Failure      400 {object} models.SwaggerResponse
+// @Failure      401 {object} models.SwaggerResponse
 // @Router       /api/v1/auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req struct {
@@ -86,11 +85,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Password   string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
+		response.Error(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
 		return
 	}
 	if req.Identifier == "" || req.Password == "" {
-		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "identifier and password are required", "")
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "identifier and password are required", "")
 		return
 	}
 
@@ -98,14 +97,14 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrInvalidCredentials):
-			writeError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid email/username or password", "")
+			response.Error(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid email/username or password", "")
 		default:
-			writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to login", "")
+			response.Error(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to login", "")
 		}
 		return
 	}
 
-	writeJSON(w, http.StatusOK, "login successful", map[string]string{
+	response.JSON(w, http.StatusOK, "login successful", map[string]string{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	})
@@ -118,20 +117,20 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Accept       json
 // @Produce      json
 // @Param        body body models.RefreshRequest true "Refresh payload"
-// @Success      200 {object} Response
-// @Failure      400 {object} Response
-// @Failure      401 {object} Response
+// @Success      200 {object} models.SwaggerTokenResponse
+// @Failure      400 {object} models.SwaggerResponse
+// @Failure      401 {object} models.SwaggerResponse
 // @Router       /api/v1/auth/refresh [post]
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
+		response.Error(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
 		return
 	}
 	if req.RefreshToken == "" {
-		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "refresh_token is required", "")
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "refresh_token is required", "")
 		return
 	}
 
@@ -139,14 +138,14 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, services.ErrInvalidRefreshToken):
-			writeError(w, http.StatusUnauthorized, "INVALID_REFRESH_TOKEN", "invalid or expired refresh token", "")
+			response.Error(w, http.StatusUnauthorized, "INVALID_REFRESH_TOKEN", "invalid or expired refresh token", "")
 		default:
-			writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to refresh token", "")
+			response.Error(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to refresh token", "")
 		}
 		return
 	}
 
-	writeJSON(w, http.StatusOK, "token refreshed", map[string]string{
+	response.JSON(w, http.StatusOK, "token refreshed", map[string]string{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	})
@@ -160,14 +159,14 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Security     BearerAuth
 // @Param        body body models.LogoutRequest true "Logout payload"
-// @Success      200 {object} Response
-// @Failure      400 {object} Response
-// @Failure      401 {object} Response
+// @Success      200 {object} models.SwaggerResponse
+// @Failure      400 {object} models.SwaggerResponse
+// @Failure      401 {object} models.SwaggerResponse
 // @Router       /api/v1/auth/logout [post]
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUser(r.Context())
 	if user == nil {
-		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required", "")
+		response.Error(w, http.StatusUnauthorized, "MISSING_TOKEN", "authentication required", "")
 		return
 	}
 
@@ -175,21 +174,21 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		RefreshToken string `json:"refresh_token"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
+		response.Error(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
 		return
 	}
 	if req.RefreshToken == "" {
-		writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "refresh_token is required", "")
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "refresh_token is required", "")
 		return
 	}
 
 	err := h.AuthService.Logout(r.Context(), req.RefreshToken)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "INVALID_REFRESH_TOKEN", "invalid refresh token", "")
+		response.Error(w, http.StatusUnauthorized, "INVALID_REFRESH_TOKEN", "invalid or expired refresh token", "")
 		return
 	}
 
-	writeJSON(w, http.StatusOK, "logged out", nil)
+	response.JSON(w, http.StatusOK, "logged out", nil)
 }
 
 // Me godoc
@@ -198,16 +197,16 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Produce      json
 // @Security     BearerAuth
-// @Success      200 {object} Response
-// @Failure      401 {object} Response
+// @Success      200 {object} models.SwaggerUserResponse
+// @Failure      401 {object} models.SwaggerResponse
 // @Router       /api/v1/auth/me [get]
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUser(r.Context())
 	if user == nil {
-		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required", "")
+		response.Error(w, http.StatusUnauthorized, "MISSING_TOKEN", "authentication required", "")
 		return
 	}
-	writeJSON(w, http.StatusOK, "user retrieved", user)
+	response.JSON(w, http.StatusOK, "user retrieved", user)
 }
 
 // parseDuration parses a simple duration string like "24h", "7d", "30d".

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/abuamar142/auth-service/internal/models"
+	"github.com/abuamar142/auth-service/internal/response"
 	"github.com/abuamar142/auth-service/internal/services"
 )
 
@@ -19,13 +20,13 @@ func Auth(svc *services.AuthService) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			header := r.Header.Get("Authorization")
 			if header == "" || !strings.HasPrefix(header, "Bearer ") {
-				http.Error(w, `{"error":{"code":"UNAUTHORIZED","message":"missing or invalid Authorization header"}}`, http.StatusUnauthorized)
+				response.Error(w, http.StatusUnauthorized, "MISSING_TOKEN", "missing or invalid Authorization header", "expected: Bearer <token>")
 				return
 			}
 			token := strings.TrimPrefix(header, "Bearer ")
 			user, err := svc.ValidateAccessToken(r.Context(), token)
 			if err != nil {
-				http.Error(w, `{"error":{"code":"UNAUTHORIZED","message":"invalid or expired token"}}`, http.StatusUnauthorized)
+				response.Error(w, http.StatusUnauthorized, "INVALID_TOKEN", "invalid or expired access token", "")
 				return
 			}
 			ctx := context.WithValue(r.Context(), UserKey, user)

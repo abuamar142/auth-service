@@ -93,6 +93,7 @@ func main() {
 	r.Use(chimw.Recoverer)
 	r.Use(chimw.RealIP)
 	r.Use(chimw.RequestID)
+	r.Use(middleware.RequestID)
 	r.Use(corsMiddleware)
 
 	// Health (unversioned, load balancers need it)
@@ -105,10 +106,13 @@ func main() {
 
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
-		// Public
-		r.Post("/auth/register", authH.Register)
-		r.Post("/auth/login", authH.Login)
-		r.Post("/auth/refresh", authH.Refresh)
+		// Public — rate limited
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.RateLimitAuth())
+			r.Post("/auth/register", authH.Register)
+			r.Post("/auth/login", authH.Login)
+			r.Post("/auth/refresh", authH.Refresh)
+		})
 
 		// Auth-protected
 		r.Group(func(r chi.Router) {
@@ -167,13 +171,29 @@ func runMigrations(databaseURL string) error {
 	return nil
 }
 
+var allowedOrigins = map[string]bool{
+	"https://abuamar.online":      true,
+	"https://dev.abuamar.online":   true,
+	"https://tambangan.abuamar.online":  true,
+	"https://dev.tambangan.abuamar.online": true,
+	"https://asyaikhoni.abuamar.online": true,
+	"https://auth.abuamar.online":  true,
+	"http://localhost:5173":        true, // local dev
+	"http://localhost:3000":        true, // local dev CMS
+}
+
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
+		origin := r.Header.Get("Origin")
+		if allowedOrigins[origin] {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		}
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key, X-Request-ID")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Max-Age", "86400")
 		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 		next.ServeHTTP(w, r)

@@ -5,17 +5,19 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/abuamar142/auth-service/internal/response"
 )
 
-func TestWriteJSON_Success(t *testing.T) {
+func TestResponseJSON_Success(t *testing.T) {
 	w := httptest.NewRecorder()
-	writeJSON(w, http.StatusOK, "operation successful", map[string]string{"key": "value"})
+	response.JSON(w, http.StatusOK, "operation successful", map[string]string{"key": "value"})
 
 	if w.Code != http.StatusOK {
 		t.Errorf("expected status 200, got %d", w.Code)
 	}
 
-	var resp Response
+	var resp response.Response
 	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
@@ -30,11 +32,11 @@ func TestWriteJSON_Success(t *testing.T) {
 	}
 }
 
-func TestWriteJSON_WithNilData(t *testing.T) {
+func TestResponseJSON_WithNilData(t *testing.T) {
 	w := httptest.NewRecorder()
-	writeJSON(w, http.StatusOK, "done", nil)
+	response.JSON(w, http.StatusOK, "done", nil)
 
-	var resp Response
+	var resp response.Response
 	json.NewDecoder(w.Body).Decode(&resp)
 	if resp.Data != nil {
 		t.Error("expected data to be nil/omitted for nil input")
@@ -44,15 +46,15 @@ func TestWriteJSON_WithNilData(t *testing.T) {
 	}
 }
 
-func TestWriteError(t *testing.T) {
+func TestResponseError(t *testing.T) {
 	w := httptest.NewRecorder()
-	writeError(w, http.StatusBadRequest, "VALIDATION_ERROR", "name is required", "field is empty")
+	response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "name is required", "field is empty")
 
 	if w.Code != http.StatusBadRequest {
 		t.Errorf("expected status 400, got %d", w.Code)
 	}
 
-	var resp Response
+	var resp response.Response
 	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
@@ -73,11 +75,11 @@ func TestWriteError(t *testing.T) {
 	}
 }
 
-func TestWriteError_EmptyDetails(t *testing.T) {
+func TestResponseError_EmptyDetails(t *testing.T) {
 	w := httptest.NewRecorder()
-	writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "missing token", "")
+	response.Error(w, http.StatusUnauthorized, "UNAUTHORIZED", "missing token", "")
 
-	var resp Response
+	var resp response.Response
 	json.NewDecoder(w.Body).Decode(&resp)
 	if resp.Error.Details != "" {
 		t.Errorf("expected empty details, got '%s'", resp.Error.Details)

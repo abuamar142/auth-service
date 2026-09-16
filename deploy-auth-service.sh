@@ -3,6 +3,8 @@ set -euo pipefail
 
 # Deploy auth-service to VPS
 # Usage: deploy-auth-service.sh [branch]
+# Branch: main → prod (auth.abuamar.online, port 8080)
+#         development → dev (dev.auth.abuamar.online, port 8082)
 
 BRANCH="${1:-main}"
 DEPLOY_DIR="/opt/auth-service"
@@ -18,31 +20,44 @@ echo "Pulling $BRANCH..."
 git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 
-# Copy .env from local if not exists
-if [ ! -f .env ]; then
-    echo "ERROR: .env not found at $DEPLOY_DIR/.env"
+# Determine environment
+if [ "$BRANCH" = "development" ]; then
+    ENV="dev"
+    COMPOSE_FILES="-f docker-compose.yml -f docker-compose.dev.yml"
+    HEALTH_PORT=8082
+    ENV_FILE=".env.dev"
+else
+    ENV="prod"
+    COMPOSE_FILES="-f docker-compose.yml -f docker-compose.prod.yml"
+    HEALTH_PORT=8080
+    ENV_FILE=".env"
+fi
+
+# Check .env exists
+if [ ! -f "$ENV_FILE" ]; then
+    echo "ERROR: $ENV_FILE not found at $DEPLOY_DIR/$ENV_FILE"
     exit 1
 fi
 
 # Build and deploy
-echo "Building..."
-docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml build
+echo "Building ($ENV)..."
+docker compose --env-file "$ENV_FILE" $COMPOSE_FILES build
 
-echo "Starting services..."
-docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
+echo "Starting services ($ENV)..."
+docker compose --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans
 
 # Health check
-echo "Waiting for health check..."
+echo "Waiting for health check on port $HEALTH_PORT..."
 for i in {1..30}; do
-    HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/health 2>/dev/null || echo "000")
+    HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$HEALTH_PORT/api/health" 2>/dev/null || echo "000")
     if [ "$HTTP_CODE" = "200" ]; then
-        echo "✅ auth-service is healthy"
-        notify_success "auth-service" "auth-service deployed successfully on $BRANCH"
+        echo "✅ auth-service ($ENV) is healthy"
+        notify_success "auth-service" "auth-service $ENV deployed successfully on $BRANCH"
         exit 0
     fi
     sleep 1
 done
 
 echo "❌ Health check failed (last HTTP: $HTTP_CODE)"
-notify_fail "auth-service" "Health check failed after deploy (HTTP $HTTP_CODE)"
+notify_fail "auth-service" "auth-service $ENV health check failed after deploy (HTTP $HTTP_CODE)"
 exit 1

@@ -93,7 +93,10 @@ func loginUser(t *testing.T, identifier, password string) (string, string) {
 
 func TestHealth(t *testing.T) {
 	resp := post(t, "/api/health", nil) // GET, but post helper still works
-	resp2, _ := http.Get(baseURL + "/api/health")
+	resp2, err := http.Get(baseURL + "/api/health")
+	if err != nil {
+		t.Fatalf("health request failed: %v", err)
+	}
 	defer resp2.Body.Close()
 	resp.Body.Close()
 
@@ -313,7 +316,10 @@ func TestMe_Authenticated(t *testing.T) {
 }
 
 func TestMe_Unauthenticated(t *testing.T) {
-	resp, _ := http.Get(baseURL + "/api/v1/auth/me")
+	resp, err := http.Get(baseURL + "/api/v1/auth/me")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 401 {
 		t.Fatalf("expected 401, got %d", resp.StatusCode)
@@ -497,7 +503,10 @@ func TestAPIKey_CreateListDelete(t *testing.T) {
 }
 
 func TestAPIKey_Unauthenticated(t *testing.T) {
-	resp, _ := http.Get(baseURL + "/api/v1/api-keys")
+	resp, err := http.Get(baseURL + "/api/v1/api-keys")
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 401 {
 		t.Fatalf("expected 401, got %d", resp.StatusCode)
