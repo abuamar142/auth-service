@@ -23,6 +23,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
+	_ "github.com/abuamar142/auth-service/docs"
 )
 
 //go:embed migrations/*.sql
