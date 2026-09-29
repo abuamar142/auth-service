@@ -8,6 +8,16 @@ type Config struct {
 	JWTSecret   string
 	APIKey      string
 	BcryptCost  int
+
+	// Resend for password-reset mail. An empty APIKey disables sending: the
+	// endpoint still reports success (it must not reveal whether an address
+	// exists) and logs that no mail went out.
+	ResendAPIKey    string
+	ResendFromEmail string
+	ResendFromName  string
+	// FrontendURL builds the reset link, e.g. https://cafe.abuamar.online.
+	// Empty sends the raw token in the body instead — what a dev box wants.
+	FrontendURL string
 }
 
 func Load() *Config {
@@ -16,11 +26,15 @@ func Load() *Config {
 		cost = atoi(v)
 	}
 	return &Config{
-		Port:        getenv("PORT", "8080"),
-		DatabaseURL: os.Getenv("DATABASE_URL"),
-		JWTSecret:   os.Getenv("JWT_SECRET"),
-		APIKey:      os.Getenv("API_KEY"),
-		BcryptCost:  cost,
+		Port:            getenv("PORT", "8080"),
+		DatabaseURL:     os.Getenv("DATABASE_URL"),
+		JWTSecret:       os.Getenv("JWT_SECRET"),
+		APIKey:          os.Getenv("API_KEY"),
+		BcryptCost:      cost,
+		ResendAPIKey:    os.Getenv("RESEND_API_KEY"),
+		ResendFromEmail: getenv("RESEND_FROM_EMAIL", "noreply@abuamar.online"),
+		ResendFromName:  getenv("RESEND_FROM_NAME", "Abu Amar"),
+		FrontendURL:     os.Getenv("FRONTEND_URL"),
 	}
 }
 

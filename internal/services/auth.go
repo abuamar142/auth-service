@@ -28,11 +28,16 @@ var (
 )
 
 type AuthService struct {
-	DB          *pgxpool.Pool
-	JWTSecret   []byte
-	BcryptCost  int
+	DB              *pgxpool.Pool
+	JWTSecret       []byte
+	BcryptCost      int
 	AccessTokenTTL  time.Duration
 	RefreshTokenTTL time.Duration
+
+	// Email sends password-reset messages. Nil when no provider is
+	// configured: ForgotPassword still reports success (it must not reveal
+	// whether an address exists) but logs that nothing was sent.
+	Email EmailSender
 }
 
 func NewAuthService(db *pgxpool.Pool, jwtSecret string, bcryptCost int) *AuthService {

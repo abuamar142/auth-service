@@ -228,3 +228,60 @@ func parseDuration(s string) (time.Duration, error) {
 	}
 	return time.ParseDuration(s)
 }
+
+// ForgotPassword handles POST /auth/forgot-password.
+//
+// Always answers 200, whether or not the address exists. A different response
+// for known and unknown emails turns this endpoint into a way to test which
+// addresses have accounts, and it is reachable without logging in.
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.Error(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
+		return
+	}
+	if strings.TrimSpace(req.Email) == "" {
+		response.Error(w, http.StatusBadRequest, "VALIDATION_ERROR", "email is required", "")
+		return
+	}
+
+	if err := h.AuthService.ForgotPassword(r.Context(), req.Email); err != nil {
+		response.Error(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to process request", "")
+		return
+	}
+
+	response.JSON(w, http.StatusOK, "if the email is registered, a reset link has been sent", nil)
+}
+
+// ResetPassword handles POST /auth/reset-password.
+//
+// Distinct error codes for an invalid token and a weak password: unlike the
+// forgot step, the caller already holds a token, so there is no account state
+// left to protect and a vague message would only make the form harder to use.
+func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.Error(w, http.StatusBadRequest, "INVALID_JSON", "invalid request body", "")
+		return
+	}
+
+	err := h.AuthService.ResetPassword(r.Context(), req.Token, req.Password)
+	if err != nil {
+		switch {
+		case errors.Is(err, services.ErrInvalidResetToken):
+			response.Error(w, http.StatusBadRequest, "INVALID_TOKEN", "tautan reset tidak valid atau sudah kedaluwarsa", "")
+		case errors.Is(err, services.ErrWeakPassword):
+			response.Error(w, http.StatusBadRequest, "WEAK_PASSWORD", "password minimal 8 karakter", "")
+		default:
+			response.Error(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to reset password", "")
+		}
+		return
+	}
+
+	response.JSON(w, http.StatusOK, "password updated", nil)
+}

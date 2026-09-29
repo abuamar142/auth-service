@@ -17,6 +17,7 @@ import (
 	"github.com/abuamar142/auth-service/internal/config"
 	"github.com/abuamar142/auth-service/internal/db"
 	"github.com/abuamar142/auth-service/internal/handlers"
+	"github.com/abuamar142/auth-service/internal/email"
 	"github.com/abuamar142/auth-service/internal/middleware"
 	"github.com/abuamar142/auth-service/internal/services"
 
@@ -82,6 +83,17 @@ func main() {
 	// Initialize services
 	authSvc := services.NewAuthService(pool, cfg.JWTSecret, cfg.BcryptCost)
 
+	// Password-reset mail. Not fatal when unset: every other endpoint works,
+	// and ForgotPassword still answers 200 while logging that nothing was
+	// sent — the same response it gives for an unknown address.
+	if cfg.ResendAPIKey != "" {
+		authSvc.Email = email.NewResendSender(
+			cfg.ResendAPIKey, cfg.ResendFromEmail, cfg.ResendFromName, cfg.FrontendURL,
+		)
+	} else {
+		log.Println("warning: RESEND_API_KEY not set — password reset emails disabled")
+	}
+
 	// Initialize handlers
 	healthH := handlers.NewHealthHandler()
 	authH := handlers.NewAuthHandler(authSvc)
@@ -112,6 +124,10 @@ func main() {
 			r.Post("/auth/register", authH.Register)
 			r.Post("/auth/login", authH.Login)
 			r.Post("/auth/refresh", authH.Refresh)
+			// Rate limited like login: an unauthenticated endpoint that
+			// sends email and touches tokens is worth throttling.
+			r.Post("/auth/forgot-password", authH.ForgotPassword)
+			r.Post("/auth/reset-password", authH.ResetPassword)
 		})
 
 		// Auth-protected
