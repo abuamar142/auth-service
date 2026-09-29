@@ -20,10 +20,10 @@ import (
 	"github.com/abuamar142/auth-service/internal/middleware"
 	"github.com/abuamar142/auth-service/internal/services"
 
+	_ "github.com/abuamar142/auth-service/docs"
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	httpSwagger "github.com/swaggo/http-swagger"
-	_ "github.com/abuamar142/auth-service/docs"
 )
 
 //go:embed migrations/*.sql
@@ -171,15 +171,29 @@ func runMigrations(databaseURL string) error {
 	return nil
 }
 
+// allowedOrigins lists the browser origins permitted to call this service.
+//
+// A missing entry is not a subtle failure: the browser blocks the request and
+// the only symptom is a login form that does nothing, with the reason visible
+// solely in the devtools console. The CMS was added here after exactly that.
 var allowedOrigins = map[string]bool{
-	"https://abuamar.online":      true,
-	"https://dev.abuamar.online":   true,
-	"https://tambangan.abuamar.online":  true,
-	"https://dev.tambangan.abuamar.online": true,
-	"https://asyaikhoni.abuamar.online": true,
-	"https://auth.abuamar.online":  true,
-	"http://localhost:5173":        true, // local dev
-	"http://localhost:3000":        true, // local dev CMS
+	"https://abuamar.online":                true,
+	"https://dev.abuamar.online":            true,
+	"https://tambangan.abuamar.online":      true,
+	"https://tambangan-dev.abuamar.online":  true,
+	"https://dev.tambangan.abuamar.online":  true,
+	"https://asyaikhoni.abuamar.online":     true,
+	"https://asyaikhoni-dev.abuamar.online": true,
+	"https://cafe.abuamar.online":           true,
+	"https://cafe-dev.abuamar.online":       true,
+	"https://travlr.abuamar.online":         true,
+	"https://travlr-dev.abuamar.online":     true,
+	"https://cms.abuamar.online":            true,
+	"https://cms-dev.abuamar.online":        true,
+	"https://auth.abuamar.online":           true,
+	"https://auth-dev.abuamar.online":       true,
+	"http://localhost:5173":                 true, // local dev
+	"http://localhost:3000":                 true, // local dev CMS
 }
 
 func corsMiddleware(next http.Handler) http.Handler {
