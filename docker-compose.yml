@@ -23,7 +23,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      # This service is the token authority for every other service on the
+      # host, so they have to be able to reach it by name. Without this entry
+      # the container lands only on its own project network, and a caller on
+      # abuamar-net gets a DNS failure — which surfaces as "invalid or expired
+      # token" on every request, with the token itself perfectly valid. That
+      # is what happened to backend-service.
+      - default
+      - abuamar-net
 
 volumes:
   auth-service-pgdata:
     name: auth-service-pgdata
+
+networks:
+  abuamar-net:
+    external: true
