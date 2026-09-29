@@ -20,14 +20,23 @@ echo "Pulling $BRANCH..."
 git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 
-# Determine environment
+# Determine environment.
+#
+# Project names follow the convention used across this VPS: "auth-service"
+# for prod and "auth-service-dev" for dev. The two environments are kept
+# apart by the project name alone — compose attaches every container and
+# volume to it — while the container names (auth-service-app / -db and their
+# -dev counterparts) and the named volumes (auth-service-pgdata, explicit, not
+# project-prefixed) stay fixed, so changing a project name cannot orphan data.
 if [ "$BRANCH" = "development" ]; then
     ENV="dev"
+    PROJECT="auth-service-dev"
     COMPOSE_FILES="-f docker-compose.yml -f docker-compose.dev.yml"
     HEALTH_PORT=8082
     ENV_FILE=".env.dev"
 else
     ENV="prod"
+    PROJECT="auth-service"
     COMPOSE_FILES="-f docker-compose.yml -f docker-compose.prod.yml"
     HEALTH_PORT=8080
     ENV_FILE=".env"
@@ -41,16 +50,15 @@ fi
 
 # Build and deploy.
 #
-# One project name for both steps. They used to differ — the image was built
-# under "auth-service-$ENV" (auth-service-prod) while the containers ran under
-# "auth-service" — and compose tags the built image per project. The result was
-# that `up` never saw the image it had just built: every deploy reported
-# success while the container kept running the previous binary. The CMS CORS
-# fix appeared to deploy three times without taking effect because of this.
+# The same project name is used for both steps. They used to differ — the image
+# was built under "auth-service-$ENV" (auth-service-prod) while the containers
+# ran under "auth-service" — and compose tags a built image per project, so
+# `up` never saw the image it had just built. Every deploy reported success
+# while the container kept running the previous binary.
 #
-# --force-recreate for the same reason: compose does not recreate a container
-# when only the image contents changed under an unchanged tag.
-PROJECT="auth-service-$ENV"
+# --force-recreate for the same reason one step later: compose does not
+# recreate a container when only the image contents changed under an unchanged
+# tag.
 
 echo "Building ($ENV)..."
 docker compose --project-name "$PROJECT" --env-file "$ENV_FILE" $COMPOSE_FILES build
@@ -68,12 +76,16 @@ for i in {1..30}; do
     HTTP_CODE=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$HEALTH_PORT/api/health" 2>/dev/null || echo "000")
     if [ "$HTTP_CODE" = "200" ]; then
         echo "✅ auth-service ($ENV) is healthy"
-        notify_success "auth-service" "auth-service $ENV deployed successfully on $BRANCH"
+        # The library exports notify_deploy_success/notify_deploy_fail; the
+        # old notify_success/notify_fail names do not exist, so the deploy
+        # notification had been failing silently (and, under `set -e`, would
+        # have aborted the script after a successful deploy).
+        notify_deploy_success "auth-service-$ENV" "$BRANCH" "$HTTP_CODE"
         exit 0
     fi
     sleep 1
 done
 
 echo "❌ Health check failed (last HTTP: $HTTP_CODE)"
-notify_fail "auth-service" "auth-service $ENV health check failed after deploy (HTTP $HTTP_CODE)"
+notify_deploy_fail "auth-service-$ENV" "$BRANCH" "health check failed (HTTP $HTTP_CODE)"
 exit 1
