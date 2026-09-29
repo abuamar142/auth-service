@@ -13,12 +13,36 @@ source "$SCRIPT_DIR/../lib/notify.sh"
 
 echo "=== Deploying auth-service ($BRANCH) ==="
 
+# Serialize deploys across users.
+#
+# CI connects as `ubuntu` while a manual run is often `sudo`, so the lock path
+# must not include the user name — otherwise the two run at once, both recreate
+# the same container, and the loser dies with "container name is already in
+# use". The file is world-writable so either user can take it; the flock is what
+# serializes, not the file's permissions.
+LOCK="/tmp/auth-service-${BRANCH}.deploy.lock"
+umask 000
+exec 9>"$LOCK"
+flock 9 || { echo "ERROR: could not acquire lock ($LOCK)"; exit 1; }
+
 cd "$DEPLOY_DIR"
 
-# Pull latest code
+# Pull latest code.
+#
+# Git runs as `ubuntu`, never as root: CI connects as `ubuntu` and the repo has
+# to stay writable by it. A root-owned .git breaks the next CI deploy with
+# "cannot open '.git/FETCH_HEAD': Permission denied".
+git_ubuntu() {
+    if [ "$(id -un)" = "ubuntu" ]; then
+        git "$@"
+    else
+        sudo -u ubuntu git "$@"
+    fi
+}
+
 echo "Pulling $BRANCH..."
-git fetch origin "$BRANCH"
-git reset --hard "origin/$BRANCH"
+git_ubuntu fetch origin "$BRANCH"
+git_ubuntu reset --hard "origin/$BRANCH"
 
 # Determine environment.
 #
