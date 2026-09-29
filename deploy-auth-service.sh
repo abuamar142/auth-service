@@ -13,14 +13,18 @@ source "$SCRIPT_DIR/../lib/notify.sh"
 
 echo "=== Deploying auth-service ($BRANCH) ==="
 
-# Serialize deploys across users.
+# Serialize deploys across users AND branches.
 #
-# CI connects as `ubuntu` while a manual run is often `sudo`, so the lock path
-# must not include the user name — otherwise the two run at once, both recreate
-# the same container, and the loser dies with "container name is already in
-# use". The file is world-writable so either user can take it; the flock is what
-# serializes, not the file's permissions.
-LOCK="/tmp/auth-service-${BRANCH}.deploy.lock"
+# Keyed on the deploy directory, not the branch. Prod and dev share this
+# checkout (/opt/auth-service), so two branches pushed close together would
+# otherwise run at once — both git reset --hard the same working tree, and the
+# slower one builds whatever the faster one left behind.
+#
+# The path must not include the user name: CI connects as `ubuntu` while a
+# manual run is often `sudo`, so a per-user lock lets the two race and the
+# loser dies with "container name is already in use". The file is world-writable
+# so either user can take it; the flock is what serializes.
+LOCK="/tmp/$(echo "$DEPLOY_DIR" | tr '/' '_').deploy.lock"
 umask 000
 exec 9>"$LOCK"
 flock 9 || { echo "ERROR: could not acquire lock ($LOCK)"; exit 1; }
