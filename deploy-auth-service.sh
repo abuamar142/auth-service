@@ -24,7 +24,15 @@ DEV_DIR="/opt/auth-service-dev"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/../lib/notify.sh"
 
+# Log every run, like the other deploy scripts on this host. Without it a failed
+# deploy leaves nothing behind but scrollback, and CI's log is the only copy.
+LOG_DIR="/var/log/deploy"
+LOG_FILE="$LOG_DIR/auth-service-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p "$LOG_DIR"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 echo "=== Deploying auth-service ($BRANCH) ==="
+echo "    log: $LOG_FILE"
 
 # Serialize deploys across users AND branches.
 #
