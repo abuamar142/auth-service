@@ -194,6 +194,8 @@ var allowedOrigins = map[string]bool{
 	"https://auth-dev.abuamar.online":       true,
 	"http://localhost:5173":                 true, // local dev
 	"http://localhost:3000":                 true, // local dev CMS
+	"http://localhost:3003":                 true, // cafe frontend, local
+	"http://localhost:3004":                 true, // cafe frontend dev, local
 }
 
 func corsMiddleware(next http.Handler) http.Handler {
