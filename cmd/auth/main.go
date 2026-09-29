@@ -98,6 +98,7 @@ func main() {
 	healthH := handlers.NewHealthHandler()
 	authH := handlers.NewAuthHandler(authSvc)
 	apiKeyH := handlers.NewAPIKeyHandler(authSvc)
+	userH := handlers.NewUserHandler(authSvc)
 
 	// Setup router
 	r := chi.NewRouter()
@@ -140,6 +141,13 @@ func main() {
 			r.Get("/api-keys", apiKeyH.List)
 			r.Post("/api-keys", apiKeyH.Create)
 			r.Delete("/api-keys/{id}", apiKeyH.Delete)
+		})
+
+		// Service-to-service. Its own group outside the JWT one: the caller is
+		// another service, not a person, and it has no user to log in as.
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.APIKey(authSvc))
+			r.Get("/internal/users", userH.FindByEmail)
 		})
 	})
 

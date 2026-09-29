@@ -292,6 +292,37 @@ func (s *AuthService) ValidateAPIKey(ctx context.Context, rawKey string) (bool, 
 	return exists, nil
 }
 
+// FindByEmail returns a user by exact email, or nil when there is none.
+//
+// For other services resolving "which account should get this warung" —
+// cafe-service has no access to this database, so the admin's typed email has
+// to be resolved here. Exact match, not a search: this decides who gets
+// ownership of a business, and a fuzzy match on that is a way to hand a
+// warung to the wrong person.
+//
+// Returns nil rather than an error for "not found" so the caller can tell
+// "no such account" from "the lookup failed".
+func (s *AuthService) FindByEmail(ctx context.Context, email string) (*models.User, error) {
+	email = strings.TrimSpace(strings.ToLower(email))
+	if email == "" {
+		return nil, nil
+	}
+
+	var user models.User
+	err := s.DB.QueryRow(ctx, `
+		SELECT id, email, username, password_hash, display_name, created_at, updated_at
+		FROM users WHERE lower(email) = $1`,
+		email,
+	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.CreatedAt, &user.UpdatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("finding user by email: %w", err)
+	}
+	return &user, nil
+}
+
 // --- private helpers ---
 
 func (s *AuthService) signAccessToken(user *models.User) (string, error) {
