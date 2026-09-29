@@ -39,15 +39,27 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
-# Build and deploy
+# Build and deploy.
+#
+# One project name for both steps. They used to differ — the image was built
+# under "auth-service-$ENV" (auth-service-prod) while the containers ran under
+# "auth-service" — and compose tags the built image per project. The result was
+# that `up` never saw the image it had just built: every deploy reported
+# success while the container kept running the previous binary. The CMS CORS
+# fix appeared to deploy three times without taking effect because of this.
+#
+# --force-recreate for the same reason: compose does not recreate a container
+# when only the image contents changed under an unchanged tag.
+PROJECT="auth-service-$ENV"
+
 echo "Building ($ENV)..."
-docker compose --project-name "auth-service-$ENV" --env-file "$ENV_FILE" $COMPOSE_FILES build
+docker compose --project-name "$PROJECT" --env-file "$ENV_FILE" $COMPOSE_FILES build
 
 echo "Starting services ($ENV)..."
 if [ "$ENV" = "dev" ]; then
-    docker compose --project-name "auth-service-dev" --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans app-dev db-dev
+    docker compose --project-name "$PROJECT" --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans --force-recreate app-dev db-dev
 else
-    docker compose --project-name "auth-service" --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans app db
+    docker compose --project-name "$PROJECT" --env-file "$ENV_FILE" $COMPOSE_FILES up -d --remove-orphans --force-recreate app db
 fi
 
 # Health check
