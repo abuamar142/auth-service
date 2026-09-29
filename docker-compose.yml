@@ -2,7 +2,10 @@ services:
   db:
     image: postgres:17-alpine
     restart: unless-stopped
-    env_file: .env
+    # ENV_FILE is set per environment (see docker-compose.dev/prod.yml).
+    # Hardcoding ".env" makes the dev stack read the prod file, so anything
+    # added to .env.dev — RESEND_API_KEY, for instance — is silently ignored.
+    env_file: ${ENV_FILE:-.env}
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-auth-db}
     volumes:
@@ -16,7 +19,7 @@ services:
   app:
     build: .
     restart: unless-stopped
-    env_file: .env
+    env_file: ${ENV_FILE:-.env}
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-auth}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-auth-db}?sslmode=disable
       JWT_SECRET: ${JWT_SECRET}

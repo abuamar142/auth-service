@@ -19,6 +19,7 @@ services:
 
   app-dev:
     container_name: auth-service-app-dev
+    env_file: .env.dev
     restart: unless-stopped
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-auth}:${POSTGRES_PASSWORD}@db-dev:5432/${POSTGRES_DB:-auth-db}_dev?sslmode=disable
