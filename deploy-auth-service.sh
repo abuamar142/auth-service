@@ -3,8 +3,16 @@ set -euo pipefail
 
 # Deploy auth-service to VPS
 # Usage: deploy-auth-service.sh [branch]
-# Branch: main        → prod (auth.abuamar.online, 127.0.0.1:8080)
-#         development → dev  (auth-dev.abuamar.online, 127.0.0.1:8082)
+#
+# Routing — prod HANYA dari main, semua branch lain ke dev:
+#   main           → prod (auth.abuamar.online,      127.0.0.1:8080)
+#   branch lainnya → dev  (auth-dev.abuamar.online,  127.0.0.1:8082)
+#                    (development, feat/*, fix/*, ...)
+#
+# Kenapa bukan `else → prod` seperti sebelumnya:
+#   Dulu semua yang bukan "development" masuk prod, jadi `deploy-auth-service.sh
+#   feat/apa-pun` menimpa prod tanpa peringatan. Sekarang tidak ada jalur ke
+#   prod selain main.
 #
 # Two directories, and the distinction matters:
 #
@@ -74,7 +82,23 @@ git_ubuntu() {
 }
 
 echo "Pulling $BRANCH..."
+
+# Switch to the branch first, then reset.
+#
+# Prod and dev share this one checkout, and `reset --hard origin/$BRANCH` moves
+# whichever branch is currently checked out. Deploying `development` while
+# `main` was checked out therefore moved the local `main` pointer to
+# development's commit — the built image was still correct, but the branch
+# ref ended up describing code it did not contain, and a deploy interrupted
+# between the two left the tree on the wrong branch.
 git_ubuntu -C "$DEPLOY_DIR" fetch origin "$BRANCH"
+if [ "$(git_ubuntu -C "$DEPLOY_DIR" branch --show-current 2>/dev/null)" != "$BRANCH" ]; then
+    # -f: this directory only ever holds what came from origin, so discarding a
+    # modified tracked file cannot lose anything that is not re-fetchable.
+    git_ubuntu -C "$DEPLOY_DIR" checkout -f "$BRANCH" 2>/dev/null \
+        || git_ubuntu -C "$DEPLOY_DIR" checkout -f -b "$BRANCH" "origin/$BRANCH" 2>/dev/null \
+        || true
+fi
 git_ubuntu -C "$DEPLOY_DIR" reset --hard "origin/$BRANCH"
 
 # Fail loudly if the checkout is not on the commit we asked for. Swallowing
@@ -98,15 +122,7 @@ echo "    source at $HEAD_SHA"
 # Prod must pass both compose files: docker-compose.yml alone declares no port
 # mapping (it carries the shared service definitions and the abuamar-net join),
 # so the container would start unreachable and the health check would fail.
-if [ "$BRANCH" = "development" ]; then
-    ENV="dev"
-    PROJECT="auth-service-dev"
-    WORK_DIR="$DEV_DIR"
-    COMPOSE_FILES=""
-    HEALTH_PORT=8082
-    APP_CONTAINER="auth-service-app-dev"
-    UP_SERVICES=(app-dev db-dev)
-else
+if [ "$BRANCH" = "main" ]; then
     ENV="prod"
     PROJECT="auth-service"
     WORK_DIR="$DEPLOY_DIR"
@@ -114,6 +130,15 @@ else
     HEALTH_PORT=8080
     APP_CONTAINER="auth-service-app"
     UP_SERVICES=(app db)
+else
+    # Setiap branch selain main = dev. Tidak ada jalur ke prod dari sini.
+    ENV="dev"
+    PROJECT="auth-service-dev"
+    WORK_DIR="$DEV_DIR"
+    COMPOSE_FILES=""
+    HEALTH_PORT=8082
+    APP_CONTAINER="auth-service-app-dev"
+    UP_SERVICES=(app-dev db-dev)
 fi
 
 # Check .env exists. Each env reads its own file next to its compose file.
