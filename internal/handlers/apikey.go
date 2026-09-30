@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	_ "github.com/abuamar142/auth-service/internal/models"
 	"github.com/abuamar142/auth-service/internal/response"
 	"github.com/abuamar142/auth-service/internal/services"
+	"github.com/go-chi/chi/v5"
 )
 
 type APIKeyHandler struct {

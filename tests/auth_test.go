@@ -118,9 +118,9 @@ func TestHealth(t *testing.T) {
 func TestRegister_Success(t *testing.T) {
 	email := fmt.Sprintf("test_%d@example.com", time.Now().UnixNano())
 	resp := post(t, "/api/v1/auth/register", map[string]string{
-		"email":       email,
-		"username":    fmt.Sprintf("user_%d", time.Now().UnixNano()),
-		"password":    "securepass123",
+		"email":        email,
+		"username":     fmt.Sprintf("user_%d", time.Now().UnixNano()),
+		"password":     "securepass123",
 		"display_name": "Test User",
 	})
 	defer resp.Body.Close()
@@ -298,8 +298,8 @@ func TestLogin_MissingFields(t *testing.T) {
 func TestMe_Authenticated(t *testing.T) {
 	email := fmt.Sprintf("me_%d@example.com", time.Now().UnixNano())
 	post(t, "/api/v1/auth/register", map[string]string{
-		"email":       email,
-		"password":    "pass12345",
+		"email":        email,
+		"password":     "pass12345",
 		"display_name": "Me User",
 	}).Body.Close()
 
