@@ -225,7 +225,7 @@ func (h *AdminUserHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 // SetPassword godoc
 // @Summary      Set a user's password
-// @Description  Replaces the password and revokes that account's sessions. Admin only.
+// @Description  Replaces the password and revokes the account's refresh tokens so its session cannot be extended. Admin only.
 // @Tags         admin
 // @Accept       json
 // @Produce      json

@@ -189,6 +189,13 @@ func (s *AuthService) UpdateUser(ctx context.Context, actorID, id string, in Upd
 
 // SetPassword replaces an account's password. Used by the admin page when
 // someone needs a reset without access to their email.
+//
+// Refresh tokens are revoked along with it, matching Logout: a stolen refresh
+// token would otherwise keep minting access tokens for up to 7 days, which is
+// what makes "the password was reset" mean nothing on its own. Access tokens
+// already issued stay valid until they expire — they are stateless JWTs and
+// the service does not keep a deny-list, so the window is the 15-minute token
+// lifetime rather than the 7-day refresh lifetime.
 func (s *AuthService) SetPassword(ctx context.Context, id, password string) error {
 	if len(password) < 8 {
 		return ErrPasswordTooShort
