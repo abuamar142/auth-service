@@ -75,7 +75,7 @@ func TestAtoi(t *testing.T) {
 		expected int
 	}{
 		{"12", 12},
-		{"0", 12},  // zero falls back to default
+		{"0", 12},   // zero falls back to default
 		{"abc", 12}, // non-numeric falls back
 		{"16", 16},
 		{"", 12},

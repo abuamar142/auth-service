@@ -2,9 +2,9 @@ package models
 
 // SwaggerResponse is the standard API response envelope with realistic examples.
 type SwaggerResponse struct {
-	Success bool        `json:"success" example:"true"`
-	Message string      `json:"message" example:"operation successful"`
-	Data    interface{} `json:"data,omitempty"`
+	Success bool          `json:"success" example:"true"`
+	Message string        `json:"message" example:"operation successful"`
+	Data    interface{}   `json:"data,omitempty"`
 	Error   *SwaggerError `json:"error,omitempty"`
 }
 
@@ -36,9 +36,9 @@ type SwaggerTokenResponse struct {
 
 // SwaggerUserResponse is the response from register/me.
 type SwaggerUserResponse struct {
-	Success bool         `json:"success" example:"true"`
-	Message string       `json:"message" example:"user registered"`
-	Data    SwaggerUser  `json:"data"`
+	Success bool        `json:"success" example:"true"`
+	Message string      `json:"message" example:"user registered"`
+	Data    SwaggerUser `json:"data"`
 }
 
 // SwaggerAPIKeyResponse is the response from create API key.

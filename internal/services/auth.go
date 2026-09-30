@@ -19,12 +19,12 @@ import (
 )
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrEmailExists        = errors.New("email already exists")
-	ErrUsernameExists     = errors.New("username already exists")
-	ErrIdentifierRequired = errors.New("email or username is required")
+	ErrInvalidCredentials  = errors.New("invalid credentials")
+	ErrEmailExists         = errors.New("email already exists")
+	ErrUsernameExists      = errors.New("username already exists")
+	ErrIdentifierRequired  = errors.New("email or username is required")
 	ErrInvalidRefreshToken = errors.New("invalid or expired refresh token")
-	ErrUserNotFound       = errors.New("user not found")
+	ErrUserNotFound        = errors.New("user not found")
 )
 
 type AuthService struct {
@@ -42,9 +42,9 @@ type AuthService struct {
 
 func NewAuthService(db *pgxpool.Pool, jwtSecret string, bcryptCost int) *AuthService {
 	return &AuthService{
-		DB:               db,
-		JWTSecret:        []byte(jwtSecret),
-		BcryptCost:       bcryptCost,
+		DB:              db,
+		JWTSecret:       []byte(jwtSecret),
+		BcryptCost:      bcryptCost,
 		AccessTokenTTL:  15 * time.Minute,
 		RefreshTokenTTL: 7 * 24 * time.Hour,
 	}
