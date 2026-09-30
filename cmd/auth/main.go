@@ -16,8 +16,8 @@ import (
 
 	"github.com/abuamar142/auth-service/internal/config"
 	"github.com/abuamar142/auth-service/internal/db"
-	"github.com/abuamar142/auth-service/internal/handlers"
 	"github.com/abuamar142/auth-service/internal/email"
+	"github.com/abuamar142/auth-service/internal/handlers"
 	"github.com/abuamar142/auth-service/internal/middleware"
 	"github.com/abuamar142/auth-service/internal/services"
 
@@ -99,6 +99,7 @@ func main() {
 	authH := handlers.NewAuthHandler(authSvc)
 	apiKeyH := handlers.NewAPIKeyHandler(authSvc)
 	userH := handlers.NewUserHandler(authSvc)
+	adminUserH := handlers.NewAdminUserHandler(authSvc)
 
 	// Setup router
 	r := chi.NewRouter()
@@ -141,6 +142,20 @@ func main() {
 			r.Get("/api-keys", apiKeyH.List)
 			r.Post("/api-keys", apiKeyH.Create)
 			r.Delete("/api-keys/{id}", apiKeyH.Delete)
+		})
+
+		// Account management. Behind Auth *and* RequireAdmin: the first proves
+		// who is calling, the second that they are allowed to change other
+		// people's accounts.
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.Auth(authSvc))
+			r.Use(middleware.RequireAdmin)
+			r.Get("/admin/users", adminUserH.List)
+			r.Post("/admin/users", adminUserH.Create)
+			r.Get("/admin/users/{id}", adminUserH.Get)
+			r.Patch("/admin/users/{id}", adminUserH.Update)
+			r.Delete("/admin/users/{id}", adminUserH.Delete)
+			r.Post("/admin/users/{id}/password", adminUserH.SetPassword)
 		})
 
 		// Service-to-service. Its own group outside the JWT one: the caller is

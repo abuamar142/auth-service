@@ -29,3 +29,28 @@ type CreateAPIKeyRequest struct {
 	Name      string `json:"name" example:"portfolio-backend"`
 	ExpiresIn string `json:"expires_in,omitempty" example:"90d"`
 }
+
+// CreateUserRequest is the request body for POST /admin/users.
+type CreateUserRequest struct {
+	Email       string `json:"email" example:"new.user@example.com"`
+	Username    string `json:"username" example:"newuser"`
+	Password    string `json:"password" example:"secretpass123"`
+	DisplayName string `json:"display_name" example:"New User"`
+	IsAdmin     bool   `json:"is_admin" example:"false"`
+}
+
+// UpdateUserRequest is the request body for PATCH /admin/users/{id}.
+//
+// Every field is a pointer so "absent" and "set to empty/false" are different
+// requests: clearing a username and leaving it alone must not be the same.
+type UpdateUserRequest struct {
+	Email       *string `json:"email" example:"new.user@example.com"`
+	Username    *string `json:"username" example:"newuser"`
+	DisplayName *string `json:"display_name" example:"New User"`
+	IsAdmin     *bool   `json:"is_admin" example:"false"`
+}
+
+// SetPasswordRequest is the request body for POST /admin/users/{id}/password.
+type SetPasswordRequest struct {
+	Password string `json:"password" example:"secretpass123"`
+}

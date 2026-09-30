@@ -69,9 +69,9 @@ func (s *AuthService) Register(ctx context.Context, email, username, password, d
 	err = s.DB.QueryRow(ctx, `
 		INSERT INTO users (email, username, password_hash, display_name)
 		VALUES (NULLIF($1, ''), NULLIF($2, ''), $3, NULLIF($4, ''))
-		RETURNING id, email, username, password_hash, display_name, created_at, updated_at`,
+		RETURNING `+userColumns,
 		email, username, string(hash), displayName,
-	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if strings.Contains(err.Error(), "users_email_key") {
 			return nil, ErrEmailExists
@@ -90,10 +90,10 @@ func (s *AuthService) Login(ctx context.Context, identifier, password string) (a
 
 	var user models.User
 	err = s.DB.QueryRow(ctx, `
-		SELECT id, email, username, password_hash, display_name, created_at, updated_at
+		SELECT `+userColumns+`
 		FROM users WHERE email = $1 OR username = $1`,
 		identifier,
-	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", "", ErrInvalidCredentials
 	}
@@ -149,9 +149,9 @@ func (s *AuthService) Refresh(ctx context.Context, rawToken string) (accessToken
 	// Fetch user for new access token
 	var user models.User
 	err = s.DB.QueryRow(ctx, `
-		SELECT id, email, username, password_hash, display_name, created_at, updated_at
+		SELECT `+userColumns+`
 		FROM users WHERE id = $1`, userID,
-	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return "", "", fmt.Errorf("fetching user: %w", err)
 	}
@@ -212,9 +212,9 @@ func (s *AuthService) ValidateAccessToken(ctx context.Context, tokenStr string) 
 
 	var user models.User
 	err = s.DB.QueryRow(ctx, `
-		SELECT id, email, username, password_hash, display_name, created_at, updated_at
+		SELECT `+userColumns+`
 		FROM users WHERE id = $1`, userID,
-	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrUserNotFound
 	}
@@ -310,10 +310,10 @@ func (s *AuthService) FindByEmail(ctx context.Context, email string) (*models.Us
 
 	var user models.User
 	err := s.DB.QueryRow(ctx, `
-		SELECT id, email, username, password_hash, display_name, created_at, updated_at
+		SELECT `+userColumns+`
 		FROM users WHERE lower(email) = $1`,
 		email,
-	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Email, &user.Username, &user.PasswordHash, &user.DisplayName, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
