@@ -136,8 +136,9 @@ cp .env.example .env
 # Production
 docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
 
-# Development
-docker compose --env-file .env -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans
+# Development runs from a separate stack dir, /opt/auth-service-dev: it holds
+# its own compose file and .env, and builds from the shared source here.
+# Deploys go through /opt/ops/bin/deploy-auth-service.sh development on the VPS.
 ```
 
 ## Structure
